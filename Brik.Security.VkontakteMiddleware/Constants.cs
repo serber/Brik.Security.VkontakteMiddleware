@@ -1,6 +1,6 @@
 ﻿namespace Brik.Security.VkontakteMiddleware
 {
-    public static class Constants
+    internal static class Constants
     {
         public const string AuthenticationScheme = "Vkontakte";
         

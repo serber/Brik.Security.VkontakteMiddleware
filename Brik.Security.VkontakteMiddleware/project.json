@@ -1,5 +1,6 @@
-﻿{
-    "version": "1.0.0-*",
+{
+    "title": "ASP.NET Core Vkontakte middleware",
+    "version": "1.0.0-1",
     "description": "ASP.NET Core middleware that enables an application to support Vkontakte OAuth 2.0 authentication workflow.",
     "packOptions": {
         "repository": {
