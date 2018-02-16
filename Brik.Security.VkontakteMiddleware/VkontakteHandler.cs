@@ -1,72 +1,62 @@
 ﻿using System.Net.Http;
 using System.Security.Claims;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
-using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 
 namespace Brik.Security.VkontakteMiddleware
 {
-    internal class VkontakteHandler : OAuthHandler<VkontakteOptions>
+    public class VkontakteHandler : OAuthHandler<VkontakteOptions>
     {
-        public VkontakteHandler(HttpClient httpClient) : base(httpClient)
+        public VkontakteHandler(IOptionsMonitor<VkontakteOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
+             : base(options, logger, encoder, clock)
         {
         }
 
         protected override async Task<AuthenticationTicket> CreateTicketAsync(ClaimsIdentity identity, AuthenticationProperties properties, OAuthTokenResponse tokens)
         {
-            string endpoint = QueryHelpers.AddQueryString(Options.UserInformationEndpoint, "access_token", tokens.AccessToken);
+            var address = QueryHelpers.AddQueryString(Options.UserInformationEndpoint, "access_token", tokens.AccessToken);
 
-            if (Options.Fields.Count > 0)
+            if (Options.Fields.Count != 0)
             {
-                endpoint = QueryHelpers.AddQueryString(endpoint, "fields", string.Join(",", Options.Fields));
+                address = QueryHelpers.AddQueryString(address, "fields", string.Join(",", Options.Fields));
             }
 
-            HttpResponseMessage response = await Backchannel.GetAsync(endpoint, Context.RequestAborted);
-            response.EnsureSuccessStatusCode();
+            var response = await Backchannel.GetAsync(address, Context.RequestAborted);
+            if (!response.IsSuccessStatusCode)
+            {
+                Logger.LogError("An error occurred while retrieving the user profile: the remote server " +
+                                "returned a {Status} response with the following payload: {Headers} {Body}.",
+                                /* Status: */ response.StatusCode,
+                                /* Headers: */ response.Headers.ToString(),
+                                /* Body: */ await response.Content.ReadAsStringAsync());
 
-            string responseText = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException("An error occurred while retrieving the user profile.");
+            }
 
-            JObject payload = JObject.Parse(responseText);
+            var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
+
+            var context = new OAuthCreatingTicketContext(new ClaimsPrincipal(identity), properties, Context, Scheme, Options, Backchannel, tokens, payload);
+            var user = (JObject)payload["response"][0];
+
+            identity.AddOptionalClaim(ClaimTypes.NameIdentifier, VkontakteHelper.GetId(user), Options.ClaimsIssuer)
+                    .AddOptionalClaim(ClaimTypes.Name, VkontakteHelper.GetName(user), Options.ClaimsIssuer)
+                    .AddOptionalClaim(ClaimTypes.GivenName, VkontakteHelper.GetFirstName(user), Options.ClaimsIssuer)
+                    .AddOptionalClaim(ClaimTypes.Surname, VkontakteHelper.GetLastName(user), Options.ClaimsIssuer)
+                    .AddOptionalClaim(ClaimTypes.Hash, VkontakteHelper.GetHash(user), Options.ClaimsIssuer)
+                    .AddOptionalClaim("urn:vkontakte:photo:link", VkontakteHelper.GetPhoto(user), Options.ClaimsIssuer)
+                    .AddOptionalClaim("urn:vkontakte:photo_thumb:link", VkontakteHelper.GetPhotoThumbnail(user), Options.ClaimsIssuer);
             
-            AuthenticationTicket ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), properties, Options.AuthenticationScheme);
-            OAuthCreatingTicketContext context = new OAuthCreatingTicketContext(ticket, Context, Options, Backchannel, tokens, payload);
+            context.RunClaimActions();
 
-            string identifier = VkontakteHelper.GetId(payload);
-            if (!string.IsNullOrEmpty(identifier))
-            {
-                identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, identifier, ClaimValueTypes.String, Options.ClaimsIssuer));
-            }
-            
-            string firstName = VkontakteHelper.GetFirstName(payload);
-            if (!string.IsNullOrEmpty(firstName))
-            {
-                identity.AddClaim(new Claim(ClaimTypes.GivenName, firstName, ClaimValueTypes.String, Options.ClaimsIssuer));
-            }
+            await Events.CreatingTicket(context);
 
-            string lastName = VkontakteHelper.GetLastName(payload);
-            if (!string.IsNullOrEmpty(lastName))
-            {
-                identity.AddClaim(new Claim(ClaimTypes.Surname, lastName, ClaimValueTypes.String, Options.ClaimsIssuer));
-            }
-
-            string name = VkontakteHelper.GetScreenName(payload);
-            if (!string.IsNullOrEmpty(name))
-            {
-                identity.AddClaim(new Claim(ClaimTypes.Name, name, ClaimValueTypes.String, Options.ClaimsIssuer));
-            }
-            
-            string photo = VkontakteHelper.GetPhoto(payload);
-            if (!string.IsNullOrEmpty(photo))
-            {
-                identity.AddClaim(new Claim("urn:vkontakte:link", photo, ClaimValueTypes.String, Options.ClaimsIssuer));
-            }
-            
-            await Options.Events.CreatingTicket(context);
-
-            return context.Ticket;
+            return new AuthenticationTicket(context.Principal, context.Properties, Scheme.Name);
         }
     }
 }

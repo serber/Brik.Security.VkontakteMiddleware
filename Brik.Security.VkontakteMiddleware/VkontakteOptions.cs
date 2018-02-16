@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
-using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Http;
 
 namespace Brik.Security.VkontakteMiddleware
 {
     /// <summary>
-    /// Configuration options for <see cref="VkontakteMiddleware"/>.
+    /// Configuration options
     /// </summary>
     public class VkontakteOptions : OAuthOptions
     {
@@ -14,19 +14,25 @@ namespace Brik.Security.VkontakteMiddleware
         /// </summary>
         public VkontakteOptions()
         {
-            AuthenticationScheme = Constants.AuthenticationScheme;
-            DisplayName = AuthenticationScheme;
-            CallbackPath = new PathString("/signin-vkontakte");
-            AuthorizationEndpoint = Constants.AuthorizeEndpoint;
-            TokenEndpoint = Constants.TokenEndpoint;
-            UserInformationEndpoint = Constants.GraphApiEndpoint;
-            Fields = new[] { "uid", "first_name", "last_name", "photo_50", "screen_name" };
+            CallbackPath = new PathString(VkontakteDefault.CallbackPath);
+            AuthorizationEndpoint = VkontakteDefault.AuthorizationEndpoint;
+            TokenEndpoint = VkontakteDefault.TokenEndpoint;
+            UserInformationEndpoint = VkontakteDefault.UserInformationEndpoint;
         }
 
         /// <summary>
-        /// The list of fields to retrieve from the UserInformationEndpoint.
-        /// https://vk.com/dev/fields
+        /// Gets the list of fields to retrieve from the user information endpoint.
+        /// See https://vk.com/dev/fields for more information.
         /// </summary>
-        public ICollection<string> Fields { get; }
+        public ICollection<string> Fields { get; } = new HashSet<string> {
+            "uid",
+            "first_name",
+            "last_name",
+            "photo_rec",
+            "photo",
+            "hash",
+            "screen_name",
+            "domain"
+        };
     }
 }

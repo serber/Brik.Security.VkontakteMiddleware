@@ -1,82 +1,46 @@
-﻿using System;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 
 namespace Brik.Security.VkontakteMiddleware
 {
     /// <summary>
     /// Contains static methods that allow to extract user's information from a <see cref="JObject"/>
-    /// instance retrieved from Facebook after a successful authentication process.
+    /// instance retrieved from Vkontakte after a successful authentication process.
     /// </summary>
-    internal static class VkontakteHelper
+    public static class VkontakteHelper
     {
         /// <summary>
-        /// Gets the user ID.
+        /// Gets the identifier associated with the logged in user.
         /// </summary>
-        public static string GetId(JObject response)
-        {
-            if (response == null)
-            {
-                throw new ArgumentNullException(nameof(response));
-            }
-
-            return GetStringValue(response, "uid");
-        }
-        
-        /// <summary>
-        /// Gets the first name.
-        /// </summary>
-        public static string GetFirstName(JObject response)
-        {
-            if (response == null)
-            {
-                throw new ArgumentNullException(nameof(response));
-            }
-
-            return GetStringValue(response, "first_name");
-        }
-        
-        /// <summary>
-        /// Gets the last name.
-        /// </summary>
-        public static string GetLastName(JObject response)
-        {
-            if (response == null)
-            {
-                throw new ArgumentNullException(nameof(response));
-            }
-
-            return GetStringValue(response, "last_name");
-        }
+        public static string GetId(JObject user) => user.Value<string>("uid");
 
         /// <summary>
-        /// Gets the screen name.
+        /// Gets the hash for checking authorization on the remote client.
         /// </summary>
-        public static string GetScreenName(JObject response)
-        {
-            if (response == null)
-            {
-                throw new ArgumentNullException(nameof(response));
-            }
+        public static string GetHash(JObject user) => user.Value<string>("hash");
 
-            return GetStringValue(response, "screen_name");
-        }
-        
         /// <summary>
-        /// Get photo
+        /// Gets the first name associated with the logged in user.
         /// </summary>
-        public static string GetPhoto(JObject response)
-        {
-            if (response == null)
-            {
-                throw new ArgumentNullException(nameof(response));
-            }
+        public static string GetName(JObject user) => user.Value<string>("screen_name");
 
-            return GetStringValue(response, "photo_50");
-        }
+        /// <summary>
+        /// Gets the first name associated with the logged in user.
+        /// </summary>
+        public static string GetFirstName(JObject user) => user.Value<string>("first_name");
 
-        private static string GetStringValue(JObject jObject, string key)
-        {
-            return jObject["response"][0].Value<string>(key) ?? string.Empty;
-        }
+        /// <summary>
+        /// Gets the last name associated with the logged in user.
+        /// </summary>
+        public static string GetLastName(JObject user) => user.Value<string>("last_name");
+
+        /// <summary>
+        /// Gets the URL of the user profile picture.
+        /// </summary>
+        public static string GetPhoto(JObject user) => user.Value<string>("photo");
+
+        /// <summary>
+        /// Gets the URL of the user profile thumbnail.
+        /// </summary>
+        public static string GetPhotoThumbnail(JObject user) => user.Value<string>("photo_rec");
     }
 }

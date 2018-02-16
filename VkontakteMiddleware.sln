@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2026
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Brik.Security.VkontakteMiddleware", "Brik.Security.VkontakteMiddleware\Brik.Security.VkontakteMiddleware.xproj", "{EE97F65F-0EBE-4EA0-A9F4-7C81C29B08BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brik.Security.VkontakteMiddleware", "Brik.Security.VkontakteMiddleware\Brik.Security.VkontakteMiddleware.csproj", "{EE97F65F-0EBE-4EA0-A9F4-7C81C29B08BC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +18,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {82629C44-AF6A-4EBD-803A-217D5C2EDDF4}
 	EndGlobalSection
 EndGlobal
