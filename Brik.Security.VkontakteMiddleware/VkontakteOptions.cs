@@ -18,7 +18,10 @@ namespace Brik.Security.VkontakteMiddleware
             AuthorizationEndpoint = VkontakteDefault.AuthorizationEndpoint;
             TokenEndpoint = VkontakteDefault.TokenEndpoint;
             UserInformationEndpoint = VkontakteDefault.UserInformationEndpoint;
+            ApiVersion = VkontakteDefault.DefaultApiVersion;
         }
+
+        public string ApiVersion { get; set; }
 
         /// <summary>
         /// Gets the list of fields to retrieve from the user information endpoint.

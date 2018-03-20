@@ -21,6 +21,7 @@ namespace Brik.Security.VkontakteMiddleware
         protected override async Task<AuthenticationTicket> CreateTicketAsync(ClaimsIdentity identity, AuthenticationProperties properties, OAuthTokenResponse tokens)
         {
             var address = QueryHelpers.AddQueryString(Options.UserInformationEndpoint, "access_token", tokens.AccessToken);
+            address = QueryHelpers.AddQueryString(address, "v", Options.ApiVersion);
 
             if (Options.Fields.Count != 0)
             {

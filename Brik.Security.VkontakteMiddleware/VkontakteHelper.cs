@@ -11,7 +11,7 @@ namespace Brik.Security.VkontakteMiddleware
         /// <summary>
         /// Gets the identifier associated with the logged in user.
         /// </summary>
-        public static string GetId(JObject user) => user.Value<string>("uid");
+        public static string GetId(JObject user) => user.Value<string>("id");
 
         /// <summary>
         /// Gets the hash for checking authorization on the remote client.

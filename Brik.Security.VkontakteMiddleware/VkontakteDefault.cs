@@ -37,5 +37,10 @@ namespace Brik.Security.VkontakteMiddleware
         /// Default value for <see cref="OAuthOptions.UserInformationEndpoint"/>.
         /// </summary>
         public const string UserInformationEndpoint = "https://api.vk.com/method/users.get.json";
+
+        /// <summary>
+        /// Default API version
+        /// </summary>
+        internal const string DefaultApiVersion = "5.73";
     }
 }
