@@ -16,3 +16,6 @@ app.UseVkontakteAuthentication(new VkontakteOptions
     SaveTokens = true
 });
 ```
+
+### This is an obsolete version, please use middleware from
+https://github.com/aspnet-contrib/AspNet.Security.OAuth.Providers/tree/dev/src/AspNet.Security.OAuth.Vkontakte
